@@ -1,0 +1,22 @@
+name: Deploy to Cloudflare Pages
+# 자동포스팅 push → CF Pages 자동 배포 (git 미연동 프로젝트 대체 파이프라인)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@3 pages deploy . --project-name=ttjc --branch=main --commit-dirty=true
